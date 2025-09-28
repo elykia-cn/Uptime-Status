@@ -1,0 +1,54 @@
+name: 部署到 page 分支
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  TZ: Asia/Shanghai
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出源码
+        uses: actions/checkout@v3
+        with:
+          ref: main
+          
+      - name: 缓存项目 npm 包
+        id: cache-node-modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-22-nodeModules-${{ hashFiles('package-lock.json') }}-${{ hashFiles('package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-22-nodeModules-
+
+      - name: 设置 Node.js 环境
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+
+      - name: 更新 npm 包
+        run: npm update
+
+      - name: 安装依赖
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm install --save
+
+      - name: 构建站点
+        run: npm run build
+
+      - name: 部署到 page 分支
+        run: |
+          cd ./dist
+          git init
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add .
+          git commit -m "$(date +"%Z %Y-%m-%d %A %H:%M:%S")"
+          git push --force --quiet "https://willow-god:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" master:page
