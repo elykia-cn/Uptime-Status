@@ -38,12 +38,13 @@ export const fetchMonitorData = async () => {
       }
     )
 
+    console.log('获取监控数据成功:', response.data.monitors)
     if (response.data?.stat !== 'ok') {
       throw new Error('API 请求失败: ' + response.data?.message || '未知错误')
     }
 
     return response.data.monitors
-      .sort((a, b) => b.create_datetime - a.create_datetime)
+      .sort((a, b) => a.friendly_name.localeCompare(b.friendly_name))
       .map(processMonitorData)
 
   } catch (error) {
