@@ -67,7 +67,7 @@
       <div class="flex flex-col items-center gap-1">
         <div>
           <a 
-            :href="pkg.repository.url" 
+            :href="pkg.repositoryUrl" 
             target="_blank" 
             rel="noopener noreferrer"
             class="font-semibold hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors"
